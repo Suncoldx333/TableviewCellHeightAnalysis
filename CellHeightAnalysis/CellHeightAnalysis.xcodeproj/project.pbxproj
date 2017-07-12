@@ -15,6 +15,7 @@
 		18EDE0531F15B87B00C0C3E5 /* HeightAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EDE0521F15B87B00C0C3E5 /* HeightAnalysis.swift */; };
 		18EDE0551F15B88C00C0C3E5 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EDE0541F15B88C00C0C3E5 /* Box.swift */; };
 		18EDE0571F15BB7A00C0C3E5 /* GlobalDefine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EDE0561F15BB7A00C0C3E5 /* GlobalDefine.swift */; };
+		18EDE05B1F15CD7400C0C3E5 /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18EDE05A1F15CD7400C0C3E5 /* TableViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		18EDE0521F15B87B00C0C3E5 /* HeightAnalysis.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeightAnalysis.swift; sourceTree = "<group>"; };
 		18EDE0541F15B88C00C0C3E5 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		18EDE0561F15BB7A00C0C3E5 /* GlobalDefine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalDefine.swift; sourceTree = "<group>"; };
+		18EDE05A1F15CD7400C0C3E5 /* TableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 		18EDE03E1F15B83400C0C3E5 /* CellHeightAnalysis */ = {
 			isa = PBXGroup;
 			children = (
+				18EDE0591F15CD5B00C0C3E5 /* Demo */,
 				18EDE0511F15B84300C0C3E5 /* AnalysisManager */,
 				18EDE03F1F15B83400C0C3E5 /* AppDelegate.swift */,
 				18EDE0411F15B83400C0C3E5 /* ViewController.swift */,
@@ -79,6 +82,14 @@
 				18EDE0541F15B88C00C0C3E5 /* Box.swift */,
 			);
 			name = AnalysisManager;
+			sourceTree = "<group>";
+		};
+		18EDE0591F15CD5B00C0C3E5 /* Demo */ = {
+			isa = PBXGroup;
+			children = (
+				18EDE05A1F15CD7400C0C3E5 /* TableViewCell.swift */,
+			);
+			name = Demo;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -157,6 +168,7 @@
 				18EDE0421F15B83400C0C3E5 /* ViewController.swift in Sources */,
 				18EDE0551F15B88C00C0C3E5 /* Box.swift in Sources */,
 				18EDE0571F15BB7A00C0C3E5 /* GlobalDefine.swift in Sources */,
+				18EDE05B1F15CD7400C0C3E5 /* TableViewCell.swift in Sources */,
 				18EDE0401F15B83400C0C3E5 /* AppDelegate.swift in Sources */,
 				18EDE0531F15B87B00C0C3E5 /* HeightAnalysis.swift in Sources */,
 			);
@@ -322,6 +334,7 @@
 				18EDE0501F15B83400C0C3E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

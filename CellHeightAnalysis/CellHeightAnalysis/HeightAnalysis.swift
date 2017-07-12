@@ -12,108 +12,130 @@ typealias cellConfigurationBlock = (_ cell : UITableViewCell) ->Void
 
 struct runtimeKey {
     static var miKey : String = "misad"
-    static var miKey2 : String = "missadt"
+    static var layoutCachekey : String = "layoutCachekey"
 }
 
 struct cellHeightCache {
     
-    var mutableHeightsByKey : NSMutableDictionary!
+    var mutableHeightsByKey : Dictionary<String,Box<CGFloat>>!
     
     init() {
-        mutableHeightsByKey = NSMutableDictionary.init()
+        mutableHeightsByKey = [String : Box]()
     }
     
     
     func exitHeightCacheAt(givenKey : String) -> Bool {
         
-        let height : NSNumber? = mutableHeightsByKey.object(forKey: givenKey) as? NSNumber
         var exitState : Bool = false
-        if height != nil && height!.floatValue != -1 {
+        
+        guard let height = mutableHeightsByKey[givenKey]?.outValue else {
+            return exitState }
+        
+        if height > 0 {
             exitState = true
         }
         
         return exitState
     }
     
-    func cache(height : CGFloat,AtKey : String) {
-        mutableHeightsByKey.setObject(NSNumber.init(value: Float.init(height)), forKey: AtKey as NSCopying)
+    mutating func cache(height : CGFloat,at key : String) {
+        mutableHeightsByKey.updateValue(Box.init(value: height), forKey: key)
     }
     
     func heightCacheAt(givenKey : String) -> CGFloat {
-        let heightNum : NSNumber = mutableHeightsByKey.object(forKey: givenKey) as! NSNumber
-        let height : CGFloat = CGFloat.init(heightNum)
+        
+        guard let height = mutableHeightsByKey[givenKey]?.outValue else {
+            return 0 }
         
         return height
     }
     
     /// 清空全部缓存,数据源变更时需要调用
-    func invalidateAllHeightCaches() {
-        mutableHeightsByKey.removeAllObjects()
+    mutating func invalidateAllHeightCaches() {
+        mutableHeightsByKey.removeAll()
     }
     
     
     /// 清空某个高度缓存，数据源变更时需要调用
     ///
     /// - Parameter key: Key
-    func invalidateHeightCacheAt(key : String!) {
-        mutableHeightsByKey.removeObject(forKey: key)
+    mutating func invalidateHeightCacheAt(key : String!) {
+        mutableHeightsByKey.removeValue(forKey: key)
     }
 }
 
 extension UITableView{
     
-    var heightCache : cellHeightCache! {
+    var heightCache : cellHeightCache {
         
         get{
-            var cache : cellHeightCache? = objc_getAssociatedObject(self, &runtimeKey.miKey) as? cellHeightCache
-            if cache == nil {
-                cache = cellHeightCache.init()
-                objc_setAssociatedObject(self, &runtimeKey.miKey, cache!, objc_AssociationPolicy.OBJC_ASSOCIATION_COPY_NONATOMIC)
-            }
+            
+            guard let cache = (objc_getAssociatedObject(self, &runtimeKey.miKey) as? Box<cellHeightCache>)?.outValue else {
+                let innerCache = cellHeightCache.init()
+                objc_setAssociatedObject(self,
+                                         &runtimeKey.miKey,
+                                         Box.init(value: innerCache),
+                                         objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                return innerCache }
+            
             return cache
+
         }
     }
     
     
     func cellHeightCacheWith(identifier : String?,cacheKey : String?,configuration : cellConfigurationBlock) -> CGFloat {
         
-        var height : CGFloat = 0
+        var height : CGFloat!
+        var muHeightCache = heightCache
         
-        if identifier == nil || cacheKey == nil {
-            return height
+        guard let innerID = identifier,let innerkey = cacheKey else {
+            return 0 }
+        
+        if muHeightCache.exitHeightCacheAt(givenKey: innerkey) {
+            return muHeightCache.heightCacheAt(givenKey: innerkey)
         }
         
-        if self.heightCache.exitHeightCacheAt(givenKey: cacheKey!) {
-            return self.heightCache.heightCacheAt(givenKey: cacheKey!)
-        }
-        
-        let preLayoutCell : UITableViewCell = cellForReuse(identifier: identifier)
+        let preLayoutCell : UITableViewCell = cellForReuse(identifier: innerID)
         preLayoutCell.prepareForReuse()
         configuration(preLayoutCell)
         
         height = fittingHeightFor(cell: preLayoutCell)
-        self.heightCache.cache(height: height, AtKey: cacheKey!)
+        muHeightCache.cache(height: height, at: cacheKey!)
+        
         return height
     }
     
-    private func cellForReuse(identifier : String?) -> UITableViewCell{
+    private func cellForReuse(identifier : String!) -> UITableViewCell{
         
-        let layouyCachekey : String = "layouyCache"
+        var preLayoutCells : Dictionary<String,UITableViewCell>!
         
-        var preLayoutCellByIdentifiers : [String : UITableViewCell]? = objc_getAssociatedObject(self, layouyCachekey) as? [String : UITableViewCell]
-        if preLayoutCellByIdentifiers == nil {
-            preLayoutCellByIdentifiers = [:]
-            objc_setAssociatedObject(self, layouyCachekey, preLayoutCellByIdentifiers, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        if let innerCells = (objc_getAssociatedObject(self, &runtimeKey.layoutCachekey) as? Box<[String : UITableViewCell]>)?.outValue {
+            preLayoutCells = innerCells
+        }else{
+            let initializeCells = [String : UITableViewCell]()
+            preLayoutCells = initializeCells
         }
         
-        var preLayoutCell : UITableViewCell? = preLayoutCellByIdentifiers?[identifier!]
-        if preLayoutCell == nil {
-            preLayoutCell = self.dequeueReusableCell(withIdentifier: identifier!)
-            preLayoutCell?.contentView.translatesAutoresizingMaskIntoConstraints = true
-            preLayoutCellByIdentifiers?.updateValue(preLayoutCell!, forKey: identifier!)
-        }
+        guard let prelayoutCell = preLayoutCells[identifier] else {
+            let innerCell = self.dequeueReusableCell(withIdentifier: identifier)
+            innerCell?.contentView.translatesAutoresizingMaskIntoConstraints = true
+            preLayoutCells.updateValue(innerCell!, forKey: identifier)
+            
+            objc_setAssociatedObject(self,
+                                     &runtimeKey.layoutCachekey,
+                                     Box.init(value: preLayoutCells),
+                                     objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            
+            return innerCell! }
         
-        return preLayoutCell!
+        objc_setAssociatedObject(self,
+                                 &runtimeKey.layoutCachekey,
+                                 Box.init(value: preLayoutCells),
+                                 objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        
+        return prelayoutCell
+
     }
     
     private func fittingHeightFor(cell : UITableViewCell) -> CGFloat {
