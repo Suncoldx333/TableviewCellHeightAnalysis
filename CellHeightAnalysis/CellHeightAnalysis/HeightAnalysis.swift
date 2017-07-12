@@ -1,14 +1,19 @@
 //
-//  learnMoreSwift.swift
-//  LearnMore
+//  HeightAnalysis.swift
+//  CellHeightAnalysis
 //
-//  Created by WangZhaoyun on 2017/5/21.
-//  Copyright © 2017年 WangZhaoyun. All rights reserved.
+//  Created by 11111 on 2017/7/12.
+//  Copyright © 2017年 ZheJiang WanHang Mdt InfoTech CO.,Ltd. All rights reserved.
 //
 
 import UIKit
 
-typealias cellConfigurationBlock = (UITableViewCell) ->Void
+typealias cellConfigurationBlock = (_ cell : UITableViewCell) ->Void
+
+struct runtimeKey {
+    static var miKey : String = "misad"
+    static var miKey2 : String = "missadt"
+}
 
 struct cellHeightCache {
     
@@ -53,10 +58,6 @@ struct cellHeightCache {
     func invalidateHeightCacheAt(key : String!) {
         mutableHeightsByKey.removeObject(forKey: key)
     }
-}
-
-struct runtimeKey {
-    static var miKey : String = "misad"
 }
 
 extension UITableView{
@@ -122,4 +123,8 @@ extension UITableView{
         
         return height
     }
+}
+
+class HeightAnalysis: NSObject {
+
 }
